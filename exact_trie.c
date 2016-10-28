@@ -35,12 +35,12 @@ static unsigned int exact_trie_malloc_cnt = 0;
 static unsigned int exact_trie_free_cnt = 0;
 #endif
 
-static struct trie_node *find_trie_node(struct trie_child *child, const char *str, int len);
+static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len);
 static int insert_trie_node(struct trie_child *child, const char *str, int len);
 static void finalize_trie_node(struct trie_child *child);
 static int compare_trie_node(const void *n1, const void *n2);
 static void free_trie_node(struct trie_child *child);
-static int search_trie_node(struct trie_child *child, const char *str, int len);
+static int search_trie_node(const struct trie_child *child, const char *str, int len);
 
 static void * trie_malloc(unsigned int size);
 static void trie_free(void *ptr);
@@ -99,10 +99,10 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len)
 		return TRIE_STATUS_EMPTY_STR;
 	}
 
-	return search_trie_node(trie, str, len);
+	return search_trie_node(&trie->child, str, len);
 }
 
-static struct trie_node *find_trie_node(struct trie_child *child, const char *str, int len)
+static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len)
 {
 	int i;
 
@@ -212,7 +212,7 @@ static void free_trie_node(struct trie_child *child)
 	trie_free(child->nodes);
 }
 
-static int search_trie_node(struct trie_child *child, const char *str, int len)
+static int search_trie_node(const struct trie_child *child, const char *str, int len)
 {
 	struct trie_node *n;
 
