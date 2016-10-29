@@ -40,7 +40,7 @@ static int insert_trie_node(struct trie_child *child, const char *str, int len);
 static void finalize_trie_node(struct trie_child *child);
 static int compare_trie_node(const void *n1, const void *n2);
 static void free_trie_node(struct trie_child *child);
-static int search_trie_node(const struct trie_child *child, const char *str, int len);
+static int search_trie_child(const struct trie_child *child, const char *str, int len);
 
 static void * trie_malloc(unsigned int size);
 static void trie_free(void *ptr);
@@ -98,8 +98,8 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len)
 	if (len == 0) {
 		return TRIE_STATUS_EMPTY_STR;
 	}
-
-	return search_trie_node(&trie->child, str, len);
+	
+	return search_trie_child(&trie->child, str, len);
 }
 
 static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len)
@@ -118,6 +118,7 @@ static struct trie_node *find_trie_node(const struct trie_child *child, const ch
 
 	return NULL;
 }
+
 
 static int insert_trie_node(struct trie_child *child, const char *str, int len)
 {
@@ -212,21 +213,32 @@ static void free_trie_node(struct trie_child *child)
 	trie_free(child->nodes);
 }
 
-static int search_trie_node(const struct trie_child *child, const char *str, int len)
+static int compare_char_with_node(const void *key, const void *n)
+{
+	const char *chr = key;
+	const struct trie_node *tn = n;
+
+	return (*chr - tn->alpha);
+} 
+
+static int search_trie_child(const struct trie_child *child, const char *str, int len)
 {
 	struct trie_node *n;
 
-	n = find_trie_node(child, str, len);
-
+	n = bsearch(str, child->nodes, child->node_cnt, sizeof(*child->nodes),
+		compare_char_with_node);
 	if (n) {
-		if (n->flags & TRIE_STRING_END) {
-			return TRIE_STATUS_OK;
-		} 
+		if (len == 1) {
+			if (n->flags & TRIE_STRING_END) {
+				return TRIE_STATUS_OK;
+			}
+		} else {
+			return search_trie_child(&n->child, str+1, len-1);
+		}
 	}
-	
+
 	return TRIE_STATUS_NO_EXIST;
 }
-
 
 
 static void * trie_malloc(unsigned int size)
