@@ -14,9 +14,9 @@ endif()
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(Boost_USE_STATIC_LIBS ON) 
-set(CMAKE_C_FLAGS "-g -Wall -std=gnu99")
+set(CMAKE_C_FLAGS "-g -Wall -Werror -std=gnu99")
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_FLAGS "-g -Wall -std=gnu++11")
+set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=gnu++11")
 set(CMAKE_CXX_COMPILER "g++")
 
 aux_source_directory(. DIR_SRCS)
