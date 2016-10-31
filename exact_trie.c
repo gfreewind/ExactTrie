@@ -24,6 +24,17 @@
 
 #define EXACT_TRIE_DEBUG
 /*******************************************************************************************/
+enum {
+	TRIE_STRING_END = 0x01,
+};
+
+struct trie_node;
+struct trie_child {
+	struct trie_node *nodes;
+	int node_cnt;
+	int capacity;
+};
+
 struct trie_node {
 	struct trie_child child;
 	char alpha;
@@ -51,6 +62,12 @@ struct exact_trie *exact_trie_create(void)
 
 	if (root) {
 		memset(root, 0, sizeof(*root));
+
+		root->child = trie_malloc(sizeof(*root->child));
+		if (!root->child) {
+			trie_free(root);
+			return NULL;
+		}
 	}
 
 	return root;
@@ -64,7 +81,7 @@ int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len)
 		return TRIE_STATUS_EMPTY_STR;
 	}
 
-	node = find_trie_node(&exact_trie->child, str, len);
+	node = find_trie_node(exact_trie->child, str, len);
 	if (node) {
 		if (node->flags & TRIE_STRING_END) {
 			return TRIE_STATUS_DUP_STR;
@@ -74,17 +91,18 @@ int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len)
 		}
 	}
 
-	return insert_trie_node(&exact_trie->child, str, len);
+	return insert_trie_node(exact_trie->child, str, len);
 }
 
 void exact_trie_finalize(struct exact_trie *trie)
 {
-	finalize_trie_node(&trie->child);
+	finalize_trie_node(trie->child);
 }
 
 void exact_trie_destroy(struct exact_trie *trie)
 {
-	free_trie_node(&trie->child);
+	free_trie_node(trie->child);
+	trie_free(trie->child);
 	trie_free(trie);
 
 #ifdef EXACT_TRIE_DEBUG
@@ -99,7 +117,7 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len)
 		return TRIE_STATUS_EMPTY_STR;
 	}
 	
-	return search_trie_child(&trie->child, str, len);
+	return search_trie_child(trie->child, str, len);
 }
 
 static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len)

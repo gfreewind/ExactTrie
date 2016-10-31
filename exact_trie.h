@@ -26,19 +26,9 @@ enum {
 	TRIE_STATUS_NO_EXIST,
 };
 
-enum {
-	TRIE_STRING_END = 0x01,
-};
-
-struct trie_node;
-struct trie_child {
-	struct trie_node *nodes;
-	int node_cnt;
-	int capacity;
-};
-
+struct trie_child;
 struct exact_trie {
-	struct trie_child child;
+	struct trie_child *child;
 };
 
 struct exact_trie *exact_trie_create(void);
