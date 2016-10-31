@@ -23,6 +23,7 @@
 #include "exact_trie.h"
 
 #define EXACT_TRIE_DEBUG
+#define TRIE_MAX_STR_LEN	(1024)
 /*******************************************************************************************/
 enum {
 	TRIE_STRING_END = 0x01,
@@ -55,6 +56,10 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 
 static void * trie_malloc(unsigned int size);
 static void trie_free(void *ptr);
+
+static void dump_trie_childs(struct trie_child *child, char *str, int index);
+static void dump_trie_node(struct trie_node *n, char *str, int index);
+
 /*******************************************************************************************/
 struct exact_trie *exact_trie_create(void)
 {
@@ -79,6 +84,10 @@ int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len)
 
 	if (!len) {
 		return TRIE_STATUS_EMPTY_STR;
+	}
+
+	if (len >= TRIE_MAX_STR_LEN) {
+		return TRIE_STATUS_TOO_LONG_STR;
 	}
 
 	node = find_trie_node(exact_trie->child, str, len);
@@ -118,6 +127,35 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len)
 	}
 	
 	return search_trie_child(trie->child, str, len);
+}
+
+void exact_trie_dump(const struct exact_trie *trie)
+{
+	char str[TRIE_MAX_STR_LEN];
+
+	dump_trie_childs(trie->child, str, 0);
+}
+
+static void dump_trie_node(struct trie_node *n, char *str, int index)
+{
+	str[index] = n->alpha;
+	index++;
+
+	if (n->flags & TRIE_STRING_END) {
+		str[index] = '\0';
+		fprintf(stdout, "%s\n", str);
+	}
+
+	dump_trie_childs(&n->child, str, index);
+}
+
+static void dump_trie_childs(struct trie_child *child, char *str, int index)
+{
+	int i;
+
+	for (i = 0; i < child->node_cnt; ++i) {
+		dump_trie_node(child->nodes+i, str, index);
+	}
 }
 
 static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len)
