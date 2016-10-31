@@ -26,7 +26,11 @@ static const char *pattern[] = {
 	"we",
 	"internet",
 	"baby",
-	"ikuai8"
+	"ikuai8",
+	"test12",
+	"tesa",
+	"tesa123",
+	"tesa12",
 };
 
 static const char *part_pattern[] = {
@@ -43,7 +47,11 @@ static const char *match_str[] = {
 	"ikuai8",
 	"tes",
 	"net",
-	"ab",	
+	"ab",
+	"test12",
+	"tesa",
+	"tesa123",
+	"tesa12",
 };
 
 static const char *no_match_str[] = {
