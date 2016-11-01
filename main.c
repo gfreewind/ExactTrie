@@ -85,6 +85,7 @@ int main(void)
 		}
 	}
 	fprintf(stdout, "TestCase1: Insert multiple patterns successfully\n");
+	exact_trie_finalize(trie);
 
 	for (i = 0; i < ARRAY_SIZE(pattern); ++i) {
 		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]));
@@ -107,6 +108,7 @@ int main(void)
 	fprintf(stdout, "TestCase3: Part patterns successfully\n");
 
 	exact_trie_finalize(trie);
+	exact_trie_dump(trie);
 
 	for (i = 0; i < ARRAY_SIZE(match_str); ++i) {
 		ret = exact_trie_search(trie, match_str[i], strlen(match_str[i]));
