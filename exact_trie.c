@@ -233,12 +233,12 @@ static void finalize_trie_node(struct trie_child *child)
 	int i;
 
 	if (child->node_cnt > 1) {
-		for (i = 0; i < child->node_cnt; ++i) {
-			finalize_trie_node(&child->nodes[i].child);
-		}
-
 		qsort(child->nodes, child->node_cnt, sizeof(*child->nodes),
 			compare_trie_node);
+	}
+
+	for (i = 0; i < child->node_cnt; ++i) {
+		finalize_trie_node(&child->nodes[i].child);
 	}
 }
 
