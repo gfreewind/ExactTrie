@@ -149,6 +149,8 @@ int main(void)
 				ret, match_str[i]);
 			exit(1);
 		}
+		fprintf(stdout, "\tThe exact match result of \"%s\" is ", match_str[i]);
+		exact_trie_match_show(&match);
 	}
 	fprintf(stdout, "TestCase4: Pass match pattern\n");
 
@@ -169,7 +171,9 @@ int main(void)
 			fprintf(stderr, "TestCases6: unexpectd ret(%d) of string(%s)\n",
 				ret, prefix_match_str[i]);
 			exit(1);
-		}
+		}		
+		fprintf(stdout, "\tThe prefix match result of \"%s\" is ", prefix_match_str[i]);
+		exact_trie_match_show(&match);
 	}
 	fprintf(stdout, "TestCase6: Pass prefix_match\n");
 

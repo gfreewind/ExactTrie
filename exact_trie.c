@@ -124,6 +124,11 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len, s
 		return TRIE_STATUS_EMPTY_STR;
 	}
 
+#ifdef EXACT_TRIE_DEBUG
+	match->result[0] = '\0';
+	match->len = 0;
+#endif
+
 	if (trie->child->node_cnt) {
 		return search_trie_child(trie->child, str, len, match);
 	} else {
@@ -140,6 +145,17 @@ void exact_trie_dump(const struct exact_trie *trie)
 	dump_trie_childs(trie->child, str, 0);
 	fprintf(stdout, "\n");
 }
+
+void exact_trie_match_show(struct exact_match *match)
+{
+#ifdef EXACT_TRIE_DEBUG
+	match->result[match->len] = '\0';
+	fprintf(stdout, "\"%s\"\n", match->result);
+#else
+	fprintf(stderr, "Please enable the EXACT_TRIE_DEBUG\n");
+#endif
+}
+
 
 static void dump_trie_node(struct trie_node *n, char *str, int index)
 {
@@ -299,6 +315,11 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 	}
 
 	if (n) {
+#ifdef EXACT_TRIE_DEBUG
+		match->result[match->len] = str[0];
+		match->len++;
+#endif
+	
 		if (match->match_mode == TRIE_MODE_PREFIX_MATCH) {
 			if (n->flags & TRIE_STRING_END) {
 				return TRIE_STATUS_OK;

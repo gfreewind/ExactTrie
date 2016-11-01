@@ -44,6 +44,7 @@ struct exact_trie {
 struct exact_match {
 #ifdef EXACT_TRIE_DEBUG
 	char result[TRIE_MAX_STR_LEN];
+	int len;
 #endif
 	enum trie_match_mode match_mode;
 	void *pos;
@@ -55,6 +56,7 @@ void exact_trie_finalize(struct exact_trie *trie);
 void exact_trie_destroy(struct exact_trie *trie);
 int exact_trie_search(const struct exact_trie *trie, const char *str, int len, struct exact_match *match);
 void exact_trie_dump(const struct exact_trie *trie);
+void exact_trie_match_show(struct exact_match *match);
 
 #endif
 
