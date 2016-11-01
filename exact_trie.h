@@ -27,6 +27,11 @@ enum {
 	TRIE_STATUS_TOO_LONG_STR,
 };
 
+enum trie_match_mode {
+	TRIE_MODE_EXACT_MATCH,
+	TRIE_MODE_PREFIX_MATCH,
+};
+
 struct trie_child;
 struct exact_trie {
 	struct trie_child *child;
@@ -36,7 +41,7 @@ struct exact_trie *exact_trie_create(void);
 int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len);
 void exact_trie_finalize(struct exact_trie *trie);
 void exact_trie_destroy(struct exact_trie *trie);
-int exact_trie_search(const struct exact_trie *trie, const char *str, int len);
+int exact_trie_search(const struct exact_trie *trie, const char *str, int len, enum trie_match_mode match_mode);
 void exact_trie_dump(const struct exact_trie *trie);
 
 #endif
