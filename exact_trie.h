@@ -52,7 +52,7 @@ struct exact_match {
 };
 
 struct exact_trie *exact_trie_create(void);
-int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len);
+int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data);
 void exact_trie_finalize(struct exact_trie *trie);
 void exact_trie_destroy(struct exact_trie *trie);
 int exact_trie_search(const struct exact_trie *trie, const char *str, int len, struct exact_match *match);

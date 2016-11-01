@@ -48,6 +48,7 @@ static const char *part_pattern[] = {
 	"tes",
 	"net",
 	"ab",
+	"yz",
 };
 
 static const char *match_str[] = {
@@ -130,7 +131,7 @@ int main(void)
 	}
 
 	for (i = 0; i < ARRAY_SIZE(pattern); ++i) {
-		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]));
+		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]), (void*)(long)(i+1));
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCase1: unexpected ret(%d) of string(%s)\n", 
 				ret, pattern[i]);
@@ -140,7 +141,7 @@ int main(void)
 	fprintf(stdout, "TestCase1: Pass inserting multiple patterns\n");
 
 	for (i = 0; i < ARRAY_SIZE(pattern); ++i) {
-		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]));
+		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]), (void*)(long)i);
 		if (ret != TRIE_STATUS_DUP_STR) {
 			fprintf(stderr, "TestCase2: unexpected ret(%d) of string(%s)\n", 
 				ret, pattern[i]);
@@ -150,7 +151,7 @@ int main(void)
 	fprintf(stdout, "TestCase2: Pass forbid duplicated patterns test\n");
 
 	for (i = 0; i < ARRAY_SIZE(part_pattern); ++i) {
-		ret = exact_trie_add(trie, part_pattern[i], strlen(part_pattern[i]));
+		ret = exact_trie_add(trie, part_pattern[i], strlen(part_pattern[i]), (void*)(long)(100+i+1));
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCase3: unexpected ret(%d) of string(%s)\n", 
 				ret, part_pattern[i]);
