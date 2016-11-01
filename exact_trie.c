@@ -73,6 +73,7 @@ struct exact_trie *exact_trie_create(void)
 			trie_free(root);
 			return NULL;
 		}
+		memset(root->child, 0, sizeof(*root->child));
 	}
 
 	return root;
