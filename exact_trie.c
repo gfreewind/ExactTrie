@@ -22,8 +22,6 @@
 
 #include "exact_trie.h"
 
-#define EXACT_TRIE_DEBUG
-#define TRIE_MAX_STR_LEN	(1024)
 /*******************************************************************************************/
 enum {
 	TRIE_STRING_END = 0x01,
@@ -52,7 +50,7 @@ static int insert_trie_node(struct trie_child *child, const char *str, int len);
 static void finalize_trie_node(struct trie_child *child);
 static int compare_trie_node(const void *n1, const void *n2);
 static void free_trie_node(struct trie_child *child);
-static int search_trie_child(const struct trie_child *child, const char *str, int len, enum trie_match_mode match_mode);
+static int search_trie_child(const struct trie_child *child, const char *str, int len, struct exact_match *match);
 
 static void * trie_malloc(unsigned int size);
 static void trie_free(void *ptr);
@@ -115,19 +113,19 @@ void exact_trie_destroy(struct exact_trie *trie)
 	trie_free(trie);
 
 #ifdef EXACT_TRIE_DEBUG
-	fprintf(stderr, "ExactTrie: Alloc(%u) Free(%u)\n", 
+	fprintf(stderr, "\nExactTrie: Alloc(%u) Free(%u)\n", 
 		exact_trie_malloc_cnt, exact_trie_free_cnt);
 #endif
 }
 
-int exact_trie_search(const struct exact_trie *trie, const char *str, int len, enum trie_match_mode match_mode)
+int exact_trie_search(const struct exact_trie *trie, const char *str, int len, struct exact_match *match)
 {
 	if (len == 0) {
 		return TRIE_STATUS_EMPTY_STR;
 	}
 
 	if (trie->child->node_cnt) {
-		return search_trie_child(trie->child, str, len, match_mode);
+		return search_trie_child(trie->child, str, len, match);
 	} else {
 		return TRIE_STATUS_NO_EXIST;
 	}
@@ -137,7 +135,10 @@ void exact_trie_dump(const struct exact_trie *trie)
 {
 	char str[TRIE_MAX_STR_LEN];
 
+	fprintf(stdout, "\n");
+	fprintf(stdout, "All strings in Trie:\n");
 	dump_trie_childs(trie->child, str, 0);
+	fprintf(stdout, "\n");
 }
 
 static void dump_trie_node(struct trie_node *n, char *str, int index)
@@ -147,7 +148,7 @@ static void dump_trie_node(struct trie_node *n, char *str, int index)
 
 	if (n->flags & TRIE_STRING_END) {
 		str[index] = '\0';
-		fprintf(stdout, "%s\n", str);
+		fprintf(stdout, "\t%s\n", str);
 	}
 
 	dump_trie_childs(&n->child, str, index);
@@ -284,7 +285,7 @@ static int compare_char_with_node(const void *key, const void *n)
 /*
 Make sure the node_cnt of child is positive
 */
-static int search_trie_child(const struct trie_child *child, const char *str, int len, enum trie_match_mode match_mode)
+static int search_trie_child(const struct trie_child *child, const char *str, int len, struct exact_match *match)
 {
 	struct trie_node *n = NULL;
 
@@ -298,7 +299,7 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 	}
 
 	if (n) {
-		if (match_mode == TRIE_MODE_PREFIX_MATCH) {
+		if (match->match_mode == TRIE_MODE_PREFIX_MATCH) {
 			if (n->flags & TRIE_STRING_END) {
 				return TRIE_STATUS_OK;
 			}
@@ -310,7 +311,7 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 			}
 		} else {
 			if (n->child.node_cnt) {
-				return search_trie_child(&n->child, str+1, len-1, match_mode);
+				return search_trie_child(&n->child, str+1, len-1, match);
 			}
 		}
 	}

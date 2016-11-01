@@ -18,6 +18,10 @@
 #ifndef EXACT_TRIE_H_
 #define EXACT_TRIE_H_
 
+#define EXACT_TRIE_DEBUG
+
+#define TRIE_MAX_STR_LEN	(1024)
+
 enum {
 	TRIE_STATUS_OK,
 	TRIE_STATUS_EMPTY_STR,
@@ -37,11 +41,19 @@ struct exact_trie {
 	struct trie_child *child;
 };
 
+struct exact_match {
+#ifdef EXACT_TRIE_DEBUG
+	char result[TRIE_MAX_STR_LEN];
+#endif
+	enum trie_match_mode match_mode;
+	void *pos;
+};
+
 struct exact_trie *exact_trie_create(void);
 int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len);
 void exact_trie_finalize(struct exact_trie *trie);
 void exact_trie_destroy(struct exact_trie *trie);
-int exact_trie_search(const struct exact_trie *trie, const char *str, int len, enum trie_match_mode match_mode);
+int exact_trie_search(const struct exact_trie *trie, const char *str, int len, struct exact_match *match);
 void exact_trie_dump(const struct exact_trie *trie);
 
 #endif

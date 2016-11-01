@@ -96,6 +96,7 @@ static const char *prefix_no_match_str[] = {
 int main(void)
 {
 	struct exact_trie *trie;
+	struct exact_match match;
 	int ret, i;
 
 	trie = exact_trie_create();
@@ -112,8 +113,7 @@ int main(void)
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase1: Insert multiple patterns successfully\n");
-	exact_trie_finalize(trie);
+	fprintf(stdout, "TestCase1: Pass inserting multiple patterns\n");
 
 	for (i = 0; i < ARRAY_SIZE(pattern); ++i) {
 		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]));
@@ -123,7 +123,7 @@ int main(void)
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase2: Duplicated patterns successfully\n");
+	fprintf(stdout, "TestCase2: Pass forbid duplicated patterns test\n");
 
 	for (i = 0; i < ARRAY_SIZE(part_pattern); ++i) {
 		ret = exact_trie_add(trie, part_pattern[i], strlen(part_pattern[i]));
@@ -133,54 +133,60 @@ int main(void)
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase3: Part patterns successfully\n");
+	fprintf(stdout, "TestCase3: Pass inserting part patterns\n");
 
 	exact_trie_finalize(trie);
 
+	exact_trie_dump(trie);
+
+	memset(&match, 0, sizeof(match));
+	match.match_mode = TRIE_MODE_EXACT_MATCH;
+
 	for (i = 0; i < ARRAY_SIZE(match_str); ++i) {
-		ret = exact_trie_search(trie, match_str[i], strlen(match_str[i]), TRIE_MODE_EXACT_MATCH);
+		ret = exact_trie_search(trie, match_str[i], strlen(match_str[i]), &match);
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCase4: unexpected ret(%d) of string(%s)\n", 
 				ret, match_str[i]);
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase4: match successfully\n");
+	fprintf(stdout, "TestCase4: Pass match pattern\n");
 
 	for (i = 0; i < ARRAY_SIZE(no_match_str); ++i) {
-		ret = exact_trie_search(trie, no_match_str[i], strlen(no_match_str[i]), TRIE_MODE_EXACT_MATCH);
+		ret = exact_trie_search(trie, no_match_str[i], strlen(no_match_str[i]), &match);
 		if (ret != TRIE_STATUS_NO_EXIST) {
 			fprintf(stderr, "TestCase5: unexpected ret(%d) of string(%s)\n", 
 				ret, no_match_str[i]);
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase5: no_match successfully\n");
+	fprintf(stdout, "TestCase5: Pass no_match pattern\n");
 
+	match.match_mode = TRIE_MODE_PREFIX_MATCH;
 	for (i = 0; i < ARRAY_SIZE(prefix_match_str); ++i) {
-		ret = exact_trie_search(trie, prefix_match_str[i], strlen(prefix_match_str[i]), TRIE_MODE_PREFIX_MATCH);
+		ret = exact_trie_search(trie, prefix_match_str[i], strlen(prefix_match_str[i]), &match);
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCases6: unexpectd ret(%d) of string(%s)\n",
 				ret, prefix_match_str[i]);
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase6: prefix_match successfully\n");
+	fprintf(stdout, "TestCase6: Pass prefix_match\n");
 
 	for (i = 0; i < ARRAY_SIZE(prefix_no_match_str); ++i) {
-		ret = exact_trie_search(trie, prefix_no_match_str[i], strlen(prefix_no_match_str[i]), TRIE_MODE_PREFIX_MATCH);
+		ret = exact_trie_search(trie, prefix_no_match_str[i], strlen(prefix_no_match_str[i]), &match);
 		if (ret != TRIE_STATUS_NO_EXIST) {
 			fprintf(stderr, "TestCases7: unexpected ret(%d) of string(%s)\n",
 				ret, prefix_no_match_str[i]);
 			exit(1);
 		}
 	}
-	fprintf(stdout, "TestCase7: prefix_no_match successfully\n");
+	fprintf(stdout, "TestCase7: Pass prefix_no_match\n");
 
 	exact_trie_destroy(trie);
 
 
-	fprintf(stdout, "Passed all test cases!!!\n");
+	fprintf(stdout, "\n\n\nPassed all test cases!!!\n\n\n");
 
 	return 0;
 }
