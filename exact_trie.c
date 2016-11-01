@@ -38,6 +38,7 @@ struct trie_node {
 	struct trie_child child;
 	char alpha;
 	unsigned int flags;
+	int depth;
 };
 
 #ifdef EXACT_TRIE_DEBUG
@@ -46,7 +47,7 @@ static unsigned int exact_trie_free_cnt = 0;
 #endif
 
 static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len);
-static int insert_trie_node(struct trie_child *child, const char *str, int len);
+static int insert_trie_node(struct trie_child *child, const char *str, int len, int depth);
 static void finalize_trie_node(struct trie_child *child);
 static int compare_trie_node(const void *n1, const void *n2);
 static void free_trie_node(struct trie_child *child);
@@ -98,7 +99,7 @@ int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len)
 		}
 	}
 
-	return insert_trie_node(exact_trie->child, str, len);
+	return insert_trie_node(exact_trie->child, str, len, 1);
 }
 
 void exact_trie_finalize(struct exact_trie *trie)
@@ -124,15 +125,23 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len, s
 		return TRIE_STATUS_EMPTY_STR;
 	}
 
-#ifdef EXACT_TRIE_DEBUG
-	match->result[0] = '\0';
-	match->len = 0;
-#endif
+	if (match->cont_match && match->pos) {
+		struct trie_node *n = match->pos;
 
-	if (trie->child->node_cnt) {
-		return search_trie_child(trie->child, str, len, match);
-	} else {
+		if (n->depth < len && n->child.node_cnt) {
+			return search_trie_child(&n->child, str+n->depth, len-n->depth, match);
+		} 
 		return TRIE_STATUS_NO_EXIST;
+	} else {
+#ifdef EXACT_TRIE_DEBUG
+		match->result[0] = '\0';
+		match->len = 0;
+#endif
+		if (trie->child->node_cnt) {
+			return search_trie_child(trie->child, str, len, match);
+		} else {
+			return TRIE_STATUS_NO_EXIST;
+		}
 	}
 }
 
@@ -164,7 +173,7 @@ static void dump_trie_node(struct trie_node *n, char *str, int index)
 
 	if (n->flags & TRIE_STRING_END) {
 		str[index] = '\0';
-		fprintf(stdout, "\t%s\n", str);
+		fprintf(stdout, "\t%s(depth:%d)\n", str, n->depth);
 	}
 
 	dump_trie_childs(&n->child, str, index);
@@ -197,7 +206,7 @@ static struct trie_node *find_trie_node(const struct trie_child *child, const ch
 }
 
 
-static int insert_trie_node(struct trie_child *child, const char *str, int len)
+static int insert_trie_node(struct trie_child *child, const char *str, int len, int depth)
 {
 	struct trie_node *nn;
 	int i;
@@ -209,7 +218,7 @@ static int insert_trie_node(struct trie_child *child, const char *str, int len)
 				child->nodes[i].flags |= TRIE_STRING_END;
 				return TRIE_STATUS_OK;
 			} else {
-				return insert_trie_node(&child->nodes[i].child, str+1, len-1);
+				return insert_trie_node(&child->nodes[i].child, str+1, len-1, depth+1);
 			}
 		}
 	}
@@ -240,12 +249,13 @@ static int insert_trie_node(struct trie_child *child, const char *str, int len)
 	child->node_cnt++;
 	
 	nn->alpha = str[0];
+	nn->depth = depth;
 
 	if (len == 1) {
 		nn->flags |= TRIE_STRING_END;
 		return TRIE_STATUS_OK;
 	} else {
-		return insert_trie_node(&nn->child, str+1, len-1);
+		return insert_trie_node(&nn->child, str+1, len-1, depth+1);
 	}
 }
 
@@ -322,12 +332,14 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 	
 		if (match->match_mode == TRIE_MODE_PREFIX_MATCH) {
 			if (n->flags & TRIE_STRING_END) {
+				match->pos = n;
 				return TRIE_STATUS_OK;
 			}
 		}
 	
 		if (len == 1) {
 			if (n->flags & TRIE_STRING_END) {
+				match->pos = n;
 				return TRIE_STATUS_OK;
 			}
 		} else {

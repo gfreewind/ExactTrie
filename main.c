@@ -31,6 +31,17 @@ static const char *pattern[] = {
 	"tesa",
 	"tesa123",
 	"tesa12",
+	"xyz",
+	"xyz1",
+	"xyz2",
+	"xyz3",
+	"xyz12",
+	"xyz13",
+	"xyz21",
+	"xyz23",
+	"xyz123",
+	"xyz132",
+	
 };
 
 static const char *part_pattern[] = {
@@ -52,7 +63,20 @@ static const char *match_str[] = {
 	"tesa",
 	"tesa123",
 	"tesa12",
+	"xyz",
+	"xyz1",
+	"xyz2",
+	"xyz3",
+	"xyz12",
+	"xyz13",
+	"xyz21",
+	"xyz23",
+	"xyz123",
+	"xyz132",
 };
+
+static const char *cont_match_str = "xyz123";
+static int cont_match_times = 4;
 
 static const char *prefix_match_str[] = {
 	"test",
@@ -186,6 +210,22 @@ int main(void)
 		}
 	}
 	fprintf(stdout, "TestCase7: Pass prefix_no_match\n");
+
+	int match_times = 0;
+	memset(&match, 0, sizeof(match));
+	match.match_mode = TRIE_MODE_PREFIX_MATCH;
+	match.cont_match = 1;
+	while ((ret = exact_trie_search(trie, cont_match_str, strlen(cont_match_str), &match)) == TRIE_STATUS_OK) {
+		match_times++;
+		fprintf(stdout, "The prefix match result of \"%s\" is ", cont_match_str);
+		exact_trie_match_show(&match);
+	}
+	if (match_times != cont_match_times) {
+		fprintf(stderr, "TestCase8: Continue match only matches %u time, epxect %u\n",
+			match_times, cont_match_times);
+		exit(1);
+	}
+	fprintf(stdout, "TestCase8: Pass the cont_match\n");
 
 	exact_trie_destroy(trie);
 

@@ -47,6 +47,7 @@ struct exact_match {
 	int len;
 #endif
 	enum trie_match_mode match_mode;
+	int cont_match;
 	void *pos;
 };
 
