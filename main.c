@@ -54,13 +54,41 @@ static const char *match_str[] = {
 	"tesa12",
 };
 
+static const char *prefix_match_str[] = {
+	"test",
+	"we",
+	"internet",
+	"baby",
+	"ikuai8",
+	"tes",
+	"net",
+	"ab",
+	"test12",
+	"tesa",
+	"tesa123",
+	"tesa12",
+	"test1",
+	"testa12345",
+	"abc",
+	"netb",
+};
+
 static const char *no_match_str[] = {
 	"te",
 	"ter",
 	"ikuai",
 	"hiwe",
 	"weare",
-	"aby"
+	"aby",
+	"test123"
+};
+
+static const char *prefix_no_match_str[] = {
+	"t",
+	"e",
+	"adfsdfabc",
+	"bab",
+	"baba1",
 };
 
 #define ARRAY_SIZE(array)	(sizeof(array)/sizeof(array[0]))
@@ -108,10 +136,9 @@ int main(void)
 	fprintf(stdout, "TestCase3: Part patterns successfully\n");
 
 	exact_trie_finalize(trie);
-	exact_trie_dump(trie);
 
 	for (i = 0; i < ARRAY_SIZE(match_str); ++i) {
-		ret = exact_trie_search(trie, match_str[i], strlen(match_str[i]));
+		ret = exact_trie_search(trie, match_str[i], strlen(match_str[i]), TRIE_MODE_EXACT_MATCH);
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCase4: unexpected ret(%d) of string(%s)\n", 
 				ret, match_str[i]);
@@ -121,7 +148,7 @@ int main(void)
 	fprintf(stdout, "TestCase4: match successfully\n");
 
 	for (i = 0; i < ARRAY_SIZE(no_match_str); ++i) {
-		ret = exact_trie_search(trie, no_match_str[i], strlen(no_match_str[i]));
+		ret = exact_trie_search(trie, no_match_str[i], strlen(no_match_str[i]), TRIE_MODE_EXACT_MATCH);
 		if (ret != TRIE_STATUS_NO_EXIST) {
 			fprintf(stderr, "TestCase5: unexpected ret(%d) of string(%s)\n", 
 				ret, no_match_str[i]);
@@ -130,7 +157,30 @@ int main(void)
 	}
 	fprintf(stdout, "TestCase5: no_match successfully\n");
 
+	for (i = 0; i < ARRAY_SIZE(prefix_match_str); ++i) {
+		ret = exact_trie_search(trie, prefix_match_str[i], strlen(prefix_match_str[i]), TRIE_MODE_PREFIX_MATCH);
+		if (ret != TRIE_STATUS_OK) {
+			fprintf(stderr, "TestCases6: unexpectd ret(%d) of string(%s)\n",
+				ret, prefix_match_str[i]);
+			exit(1);
+		}
+	}
+	fprintf(stdout, "TestCase6: prefix_match successfully\n");
+
+	for (i = 0; i < ARRAY_SIZE(prefix_no_match_str); ++i) {
+		ret = exact_trie_search(trie, prefix_no_match_str[i], strlen(prefix_no_match_str[i]), TRIE_MODE_PREFIX_MATCH);
+		if (ret != TRIE_STATUS_NO_EXIST) {
+			fprintf(stderr, "TestCases7: unexpected ret(%d) of string(%s)\n",
+				ret, prefix_no_match_str[i]);
+			exit(1);
+		}
+	}
+	fprintf(stdout, "TestCase7: prefix_no_match successfully\n");
+
 	exact_trie_destroy(trie);
+
+
+	fprintf(stdout, "Passed all test cases!!!\n");
 
 	return 0;
 }
