@@ -125,8 +125,12 @@ int exact_trie_search(const struct exact_trie *trie, const char *str, int len)
 	if (len == 0) {
 		return TRIE_STATUS_EMPTY_STR;
 	}
-	
-	return search_trie_child(trie->child, str, len);
+
+	if (trie->child->node_cnt) {
+		return search_trie_child(trie->child, str, len);
+	} else {
+		return TRIE_STATUS_NO_EXIST;
+	}
 }
 
 void exact_trie_dump(const struct exact_trie *trie)
@@ -277,19 +281,31 @@ static int compare_char_with_node(const void *key, const void *n)
 	return (*chr - tn->alpha);
 } 
 
+/*
+Make sure the node_cnt of child is positive
+*/
 static int search_trie_child(const struct trie_child *child, const char *str, int len)
 {
-	struct trie_node *n;
+	struct trie_node *n = NULL;
 
-	n = bsearch(str, child->nodes, child->node_cnt, sizeof(*child->nodes),
-		compare_char_with_node);
+	if (child->node_cnt > 1) {
+		n = bsearch(str, child->nodes, child->node_cnt, sizeof(*child->nodes),
+			compare_char_with_node);
+	} else {
+		if (child->nodes[0].alpha == str[0]) {
+			n = child->nodes;
+		}
+	}
+
 	if (n) {
 		if (len == 1) {
 			if (n->flags & TRIE_STRING_END) {
 				return TRIE_STATUS_OK;
 			}
 		} else {
-			return search_trie_child(&n->child, str+1, len-1);
+			if (n->child.node_cnt) {
+				return search_trie_child(&n->child, str+1, len-1);
+			}
 		}
 	}
 
