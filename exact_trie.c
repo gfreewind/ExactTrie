@@ -338,6 +338,7 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 		if (match->match_mode == TRIE_MODE_PREFIX_MATCH) {
 			if (n->flags & TRIE_STRING_END) {
 				match->pos = n;
+				match->data = n->data;
 				return TRIE_STATUS_OK;
 			}
 		}
@@ -345,6 +346,7 @@ static int search_trie_child(const struct trie_child *child, const char *str, in
 		if (len == 1) {
 			if (n->flags & TRIE_STRING_END) {
 				match->pos = n;
+				match->data = n->data;
 				return TRIE_STATUS_OK;
 			}
 		} else {

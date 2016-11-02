@@ -51,6 +51,7 @@ struct exact_match {
 #endif
 	enum trie_match_mode match_mode;
 	int cont_match; /* Continue match from last match pos */
+	void *data; /* The data attached to the pattern */
 	void *pos;
 };
 
