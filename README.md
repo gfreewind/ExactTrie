@@ -28,7 +28,7 @@ When need to match the exact strings or exact prefixs, the original solution
 is that put the strins into different buckets by hash. When lookup, hash the
 string firstly, then find one bucket, and compare the string with every pattern
 in this bucket. 
-
+ 
 When there are many similar patterns, there may be lots of patterns in the same
 bucket. It would cost lot of time to match.
 
@@ -44,4 +44,97 @@ So I build this project "ExactTrie".
 3. Support continous match, continue searching from the last match pos;  
 4. Support return the patter's data;  
 
+# Performance
+
+## Concolusion  
+The performance advantage of ExactTrie is increasing with the count and length of patterns,
+comparing with the memcmp one by one.  
+The cost of ExactTrie only increases a bit, while the cost of memcmp solution increases dramatically.  
+
+
+## Performance Tests
+When find the hash bucket, need to memcmp the patterns in the bucket.  
+So the performance test is done by comparing with the memcmp.
+
+The following is the result of performance test:
+
+Insert 8 random strings(length is 1):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 36000000 times, cost 50 secs  
+ExactTrie match 36000000 times, cost 70 secs  
+
+Insert 16 random strings(length is 1):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 67000000 times, cost 95 secs  
+ExactTrie match 67000000 times, cost 77 secs  
+
+Insert 32 random strings(length is 1):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 130000000 times, cost 192 secs  
+ExactTrie match 130000000 times, cost 81 secs  
+
+Insert 8 random strings(length is 2):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 64 secs  
+ExactTrie match 0 times, cost 70 secs  
+
+Insert 16 random strings(length is 2):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 138 secs  
+ExactTrie match 0 times, cost 76 secs  
+
+Insert 32 random strings(length is 2):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 1000000 times, cost 261 secs  
+ExactTrie match 1000000 times, cost 81 secs  
+
+Insert 8 random strings(length is 4):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 75 secs  
+ExactTrie match 0 times, cost 70 secs  
+
+Insert 16 random strings(length is 4):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 157 secs  
+ExactTrie match 0 times, cost 77 secs  
+
+Insert 32 random strings(length is 4):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 301 secs  
+ExactTrie match 0 times, cost 81 secs  
+
+Insert 64 random strings(length is 4):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 590 secs  
+ExactTrie match 0 times, cost 87 secs  
+
+Insert 128 random strings(length is 4):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 1170 secs  
+ExactTrie match 0 times, cost 94 secs  
+
+Insert 8 random strings(length is 8):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 81 secs  
+ExactTrie match 0 times, cost 71 secs  
+
+Insert 16 random strings(length is 8):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 172 secs  
+ExactTrie match 0 times, cost 75 secs  
+
+Insert 32 random strings(length is 8):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 329 secs  
+ExactTrie match 0 times, cost 82 secs  
+
+Insert 64 random strings(length is 8):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 645 secs  
+ExactTrie match 0 times, cost 87 secs  
+              
+Insert 128 random strings(length is 8):  
+Lookup 1024 random strings(loop 1000000 times):  
+IterMemcmp match 0 times, cost 1276 secs  
+ExactTrie match 0 times, cost 93 secs  
 
