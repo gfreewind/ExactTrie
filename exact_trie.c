@@ -164,6 +164,7 @@ void exact_trie_match_show(struct exact_match *match)
 	match->result[match->len] = '\0';
 	fprintf(stdout, "\"%s\"\n", match->result);
 #else
+	fprintf(stdout, "\n");
 	fprintf(stderr, "Please enable the EXACT_TRIE_DEBUG\n");
 #endif
 }

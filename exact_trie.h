@@ -18,10 +18,13 @@
 #ifndef EXACT_TRIE_H_
 #define EXACT_TRIE_H_
 
+/* Debug switch */
 #define EXACT_TRIE_DEBUG
 
+/* Support the maximum string lenght */
 #define TRIE_MAX_STR_LEN	(1024)
 
+/* Return value */
 enum {
 	TRIE_STATUS_OK,
 	TRIE_STATUS_EMPTY_STR,
@@ -47,16 +50,33 @@ struct exact_match {
 	int len;
 #endif
 	enum trie_match_mode match_mode;
-	int cont_match;
+	int cont_match; /* Continue match from last match pos */
 	void *pos;
 };
 
 struct exact_trie *exact_trie_create(void);
-int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data);
-void exact_trie_finalize(struct exact_trie *trie);
 void exact_trie_destroy(struct exact_trie *trie);
+
+/*
+@exact_trie: exact_trie created by exact_trie_create
+@str: pattern
+@len: the length of pattern
+@data: the data which attached to pattern. It could be returned when match
+*/
+int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data);
+/* Invoke this function after insert all patterns */
+void exact_trie_finalize(struct exact_trie *trie);
+
+/*
+The work funtion to match string
+@exact_trie: exact_trie created by exact_trie_create
+@match: the match result
+*/
 int exact_trie_search(const struct exact_trie *trie, const char *str, int len, struct exact_match *match);
+
+/* Dump all patterns in the trie */
 void exact_trie_dump(const struct exact_trie *trie);
+/* Show the match result. Only works when enable EXACT_TRIE_DEBUG */
 void exact_trie_match_show(struct exact_match *match);
 
 #endif
