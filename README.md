@@ -38,10 +38,10 @@ the substring match, not from the beginning of string. For example, when insert
 exact match, so fails to match them. When do the prefix match of ExactTrie, it 
 could match the "ab".
 
-So I build this project "ExactTrie".
-1. Support exact match;
-2. Support prefix match;
-3. Support continous match, continue searching from the last match pos;
-4. Support return the patter's data;
+So I build this project "ExactTrie".  
+1. Support exact match;  
+2. Support prefix match;  
+3. Support continous match, continue searching from the last match pos;  
+4. Support return the patter's data;  
 
 
