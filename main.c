@@ -147,7 +147,7 @@ struct perf_result {
 };
 
 typedef unsigned int u32;
-typedef unsigned int u8;
+typedef unsigned char u8;
 
 typedef int bool;
 #define true 1
