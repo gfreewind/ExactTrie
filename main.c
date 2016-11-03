@@ -18,6 +18,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <time.h>
 
 #include "exact_trie.h"
 
@@ -117,6 +122,14 @@ static const char *prefix_no_match_str[] = {
 };
 
 #define ARRAY_SIZE(array)	(sizeof(array)/sizeof(array[0]))
+
+#define PERF_TEST_STR_CNT	(1024)
+#define PERF_TEST_LOOPS		(1000000)
+/***************************************************************************************************************/
+static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int loops);
+static void generate_random_str(char *buf, int len);
+/***************************************************************************************************************/
+
 
 int main(void)
 {
@@ -233,7 +246,135 @@ int main(void)
 
 	fprintf(stdout, "\n\n\nPassed all test cases!!!\n\n\n");
 
+
+	performance_tests(1, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(1, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(1, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	
+	performance_tests(2, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(2, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(2, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	
+	performance_tests(4, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(4, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(4, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(4, 64, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(4, 128, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+
+	performance_tests(8, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(8, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(8, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(8, 64, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests(8, 128, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+
 	return 0;
 }
+
+struct str_set {
+	char **str;
+};
+
+struct perf_result {
+	int match_times;
+	int cost_secs;
+};
+
+static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int loops)
+{
+	struct exact_trie *trie;
+	struct str_set pattern_set;
+	struct str_set rand_str_set;
+	struct perf_result mem_pf, trie_pf;
+	int ret, i, j, k;
+	time_t start, end;
+
+	memset(&pattern_set, 0, sizeof(pattern_set));
+
+	pattern_set.str = malloc(sizeof(*pattern_set.str)*str_cnt);
+	if (!pattern_set.str) {
+		fprintf(stderr, "Fail to malloc\n");
+		exit(1);
+	}
+
+	trie = exact_trie_create();
+	if (!trie) {
+		fprintf(stderr, "Fail to create exact trie\n");
+		exit(1);
+	}
+	
+	/* prepare the random pattern */
+	for (i = 0; i < str_cnt; ++i) {
+		pattern_set.str[i] = malloc(str_len);
+		if (!pattern_set.str[i]) {
+			fprintf(stderr, "Fail to malloc\n");
+			exit(1);
+		}
+		do {
+			generate_random_str(pattern_set.str[i], str_len);
+			ret = exact_trie_add(trie, pattern_set.str[i], str_len, NULL);
+		} while (ret != TRIE_STATUS_OK);
+	}
+	exact_trie_finalize(trie);
+
+	memset(&rand_str_set, 0, sizeof(rand_str_set));
+	rand_str_set.str = malloc(sizeof(*rand_str_set.str)*test_str_cnt);
+
+	for (i = 0; i < test_str_cnt; ++i) {
+		rand_str_set.str[i] = malloc(str_len);
+		generate_random_str(rand_str_set.str[i], str_len);
+	}
+
+	memset(&mem_pf, 0, sizeof(mem_pf));
+	memset(&trie_pf, 0, sizeof(trie_pf));
+
+	start = time(NULL);
+	for (i = 0; i < test_str_cnt; ++i) {
+		for (j = 0; j < loops; ++j) {
+			for (k = 0; k < str_cnt; ++k) {
+				if (0 == memcmp(pattern_set.str[k], rand_str_set.str[i], str_len)) {
+					mem_pf.match_times++;
+					break;
+				}
+			}
+		}
+	}
+	end = time(NULL);
+	mem_pf.cost_secs = end-start;
+
+	start = time(NULL);
+	for (i = 0; i < test_str_cnt; ++i) {
+		for (j = 0; j < loops; ++j) {
+			struct exact_match match;
+
+			memset(&match, 0, sizeof(match));
+			if (TRIE_STATUS_OK == exact_trie_search(trie, rand_str_set.str[i], str_len, &match)) {
+				trie_pf.match_times++;
+			}
+		}
+	}
+	end = time(NULL);
+	trie_pf.cost_secs = end-start;
+
+	fprintf(stdout, "\n");
+	fprintf(stdout, "Insert %u random strings(length is %u):\n", str_cnt, str_len);
+	fprintf(stdout, "Lookup %u random strings(loop %u times):\n", test_str_cnt, loops);
+	fprintf(stdout, "IterMemcmp match %u times, cost %d secs\n", mem_pf.match_times, mem_pf.cost_secs);
+	fprintf(stdout, "ExactTrie match %u times, cost %d secs\n", trie_pf.match_times, trie_pf.cost_secs);
+	fprintf(stdout, "\n");
+
+	exact_trie_destroy(trie);
+}
+
+static void generate_random_str(char *buf, int len)
+{
+	int fd;
+
+	fd = open("/dev/urandom", O_RDONLY);
+
+	read(fd, buf, len);
+
+	close(fd);
+}
+
 
 
