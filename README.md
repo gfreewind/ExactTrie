@@ -46,15 +46,19 @@ So I build this project "ExactTrie".
 
 # Performance
 
-## Concolusion  
-The performance advantage of ExactTrie is increasing with the count and length of patterns,
-comparing with the memcmp one by one.  
-The cost of ExactTrie only increases a bit, while the cost of memcmp solution increases dramatically.  
+There are two kinds of Performance Tests.
+One is done between ExactTrie and IterMemcmp, another is performed between ExactTrie and HashMemcmp.
 
+The ExactTrie is better than IterMemcmp very much, and it could be good like HashMemcmp. 
+When the hash is not averaged, it would better than HashMemcmp too.  
 
-## Performance Tests
-When find the hash bucket, need to memcmp the patterns in the bucket.  
-So the performance test is done by comparing with the memcmp.
+## Concolusion 
+
+The cost of ExactTrie match is almost not changed with increasing of the count and length of patterns.
+ 
+
+## ExactTrie vs IterMemcmp  
+
 
 The following is the result of performance test:
 
@@ -137,4 +141,113 @@ Insert 128 random strings(length is 8):
 Lookup 1024 random strings(loop 1000000 times):  
 IterMemcmp match 0 times, cost 1276 secs  
 ExactTrie match 0 times, cost 93 secs  
+
+
+## ExactTrie vs HashMemcmp (Hash firstly, then memcmp)  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 64 random strings(length is 2):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 10 secs  
+ExactTrie match 0 times, cost 8 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 128 random strings(length is 2):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 10 secs  
+ExactTrie match 0 times, cost 10 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 256 random strings(length is 2):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 10 secs  
+ExactTrie match 0 times, cost 9 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 512 random strings(length is 2):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 10 secs  
+ExactTrie match 0 times, cost 10 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 64 random strings(length is 4):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 11 secs  
+ExactTrie match 0 times, cost 8 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 128 random strings(length is 4):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 10 secs  
+ExactTrie match 0 times, cost 9 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 256 random strings(length is 4):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 9 secs  
+ExactTrie match 0 times, cost 10 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 512 random strings(length is 4):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 11 secs  
+ExactTrie match 0 times, cost 10 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 64 random strings(length is 8):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 15 secs  
+ExactTrie match 0 times, cost 7 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 128 random strings(length is 8):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 13 secs  
+ExactTrie match 0 times, cost 8 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 256 random strings(length is 8):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 10 secs  
+ExactTrie match 0 times, cost 9 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 512 random strings(length is 8):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 11 secs  
+ExactTrie match 0 times, cost 12 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 64 random strings(length is 16):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 18 secs  
+ExactTrie match 0 times, cost 8 secs  
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 128 random strings(length is 16):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 14 secs  
+ExactTrie match 0 times, cost 9 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 256 random strings(length is 16):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 15 secs  
+ExactTrie match 0 times, cost 10 secs  
+
+
+Perf Test: ExactTrie with HashMemcmp  
+Insert 512 random strings(length is 16):  
+Lookup 1024 random strings(loop 100000 times):  
+HashMemcmp match 0 times, cost 15 secs  
+ExactTrie match 0 times, cost 10 secs  
+
+
 
