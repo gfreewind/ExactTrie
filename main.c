@@ -137,14 +137,12 @@ struct perf_result {
 };
 
 /***************************************************************************************************************/
-static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int loops);
+static void performance_tests_with_iter_memcmp(int str_len, int str_cnt, int test_str_cnt, int loops);
 static void generate_random_str(char *buf, int len);
 static void create_random_str_set(struct str_set *str_set, int str_len, int str_cnt, struct exact_trie *trie);
 static void destroy_random_str_set(struct str_set *str_set);
 
 /***************************************************************************************************************/
-
-
 int main(void)
 {
 	struct exact_trie *trie;
@@ -260,26 +258,26 @@ int main(void)
 
 	fprintf(stdout, "\n\n\nPassed all test cases!!!\n\n\n");
 	
-	performance_tests(2, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(2, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(2, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(2, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(2, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(2, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
 	
-	performance_tests(4, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(4, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(4, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(4, 64, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(4, 128, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(4, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(4, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(4, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(4, 64, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(4, 128, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
 
-	performance_tests(8, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(8, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(8, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(8, 64, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(8, 128, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(8, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(8, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(8, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(8, 64, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
+	performance_tests_with_iter_memcmp(8, 128, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
 
 	return 0;
 }
 
-static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int loops)
+static void performance_tests_with_iter_memcmp(int str_len, int str_cnt, int test_str_cnt, int loops)
 {
 	struct exact_trie *trie;
 	struct str_set pattern_set;
@@ -336,6 +334,7 @@ static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int lo
 	destroy_random_str_set(&rand_str_set);
 
 	fprintf(stdout, "\n");
+	fprintf(stdout, "Perf Test: ExactTrie with IterMemcmp\n");
 	fprintf(stdout, "Insert %u random strings(length is %u):\n", str_cnt, str_len);
 	fprintf(stdout, "Lookup %u random strings(loop %u times):\n", test_str_cnt, loops);
 	fprintf(stdout, "IterMemcmp match %u times, cost %d secs\n", mem_pf.match_times, mem_pf.cost_secs);
