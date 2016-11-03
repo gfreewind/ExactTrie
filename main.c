@@ -124,10 +124,24 @@ static const char *prefix_no_match_str[] = {
 #define ARRAY_SIZE(array)	(sizeof(array)/sizeof(array[0]))
 
 #define PERF_TEST_STR_CNT	(1024)
-#define PERF_TEST_LOOPS		(1000000)
+#define PERF_TEST_LOOPS		(100000)
+
+struct str_set {
+	char **str;
+	int cnt;
+};
+
+struct perf_result {
+	int match_times;
+	int cost_secs;
+};
+
 /***************************************************************************************************************/
 static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int loops);
 static void generate_random_str(char *buf, int len);
+static void create_random_str_set(struct str_set *str_set, int str_len, int str_cnt, struct exact_trie *trie);
+static void destroy_random_str_set(struct str_set *str_set);
+
 /***************************************************************************************************************/
 
 
@@ -245,11 +259,6 @@ int main(void)
 
 
 	fprintf(stdout, "\n\n\nPassed all test cases!!!\n\n\n");
-
-
-	performance_tests(1, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(1, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
-	performance_tests(1, 32, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
 	
 	performance_tests(2, 8, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
 	performance_tests(2, 16, PERF_TEST_STR_CNT, PERF_TEST_LOOPS);
@@ -270,59 +279,27 @@ int main(void)
 	return 0;
 }
 
-struct str_set {
-	char **str;
-};
-
-struct perf_result {
-	int match_times;
-	int cost_secs;
-};
-
 static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int loops)
 {
 	struct exact_trie *trie;
 	struct str_set pattern_set;
 	struct str_set rand_str_set;
 	struct perf_result mem_pf, trie_pf;
-	int ret, i, j, k;
+	int i, j, k;
 	time_t start, end;
 
 	memset(&pattern_set, 0, sizeof(pattern_set));
-
-	pattern_set.str = malloc(sizeof(*pattern_set.str)*str_cnt);
-	if (!pattern_set.str) {
-		fprintf(stderr, "Fail to malloc\n");
-		exit(1);
-	}
 
 	trie = exact_trie_create();
 	if (!trie) {
 		fprintf(stderr, "Fail to create exact trie\n");
 		exit(1);
 	}
-	
-	/* prepare the random pattern */
-	for (i = 0; i < str_cnt; ++i) {
-		pattern_set.str[i] = malloc(str_len);
-		if (!pattern_set.str[i]) {
-			fprintf(stderr, "Fail to malloc\n");
-			exit(1);
-		}
-		do {
-			generate_random_str(pattern_set.str[i], str_len);
-			ret = exact_trie_add(trie, pattern_set.str[i], str_len, NULL);
-		} while (ret != TRIE_STATUS_OK);
-	}
+
+	create_random_str_set(&pattern_set, str_len, str_cnt, trie);	
 	exact_trie_finalize(trie);
 
-	memset(&rand_str_set, 0, sizeof(rand_str_set));
-	rand_str_set.str = malloc(sizeof(*rand_str_set.str)*test_str_cnt);
-
-	for (i = 0; i < test_str_cnt; ++i) {
-		rand_str_set.str[i] = malloc(str_len);
-		generate_random_str(rand_str_set.str[i], str_len);
-	}
+	create_random_str_set(&rand_str_set, str_len, test_str_cnt, NULL);
 
 	memset(&mem_pf, 0, sizeof(mem_pf));
 	memset(&trie_pf, 0, sizeof(trie_pf));
@@ -355,6 +332,9 @@ static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int lo
 	end = time(NULL);
 	trie_pf.cost_secs = end-start;
 
+	destroy_random_str_set(&pattern_set);
+	destroy_random_str_set(&rand_str_set);
+
 	fprintf(stdout, "\n");
 	fprintf(stdout, "Insert %u random strings(length is %u):\n", str_cnt, str_len);
 	fprintf(stdout, "Lookup %u random strings(loop %u times):\n", test_str_cnt, loops);
@@ -363,6 +343,47 @@ static void performance_tests(int str_len, int str_cnt, int test_str_cnt, int lo
 	fprintf(stdout, "\n");
 
 	exact_trie_destroy(trie);
+}
+
+static void create_random_str_set(struct str_set *str_set, int str_len, int str_cnt, struct exact_trie *trie)
+{
+	int ret, i;
+	
+	memset(str_set, 0, sizeof(*str_set));
+
+	str_set->str = malloc(sizeof(*str_set->str)*str_cnt);
+	if (!str_set->str) {
+		fprintf(stderr, "Fail to malloc\n");
+		exit(1);
+	}
+	
+	/* prepare the random pattern */
+	for (i = 0; i < str_cnt; ++i) {
+		str_set->str[i] = malloc(str_len);
+		if (!str_set->str[i]) {
+			fprintf(stderr, "Fail to malloc\n");
+			exit(1);
+		}
+
+		if (trie) {
+			do {
+				generate_random_str(str_set->str[i], str_len);
+				ret = exact_trie_add(trie, str_set->str[i], str_len, NULL);
+			} while (ret != TRIE_STATUS_OK);
+		}
+	}
+	str_set->cnt = str_cnt;
+}
+
+static void destroy_random_str_set(struct str_set *str_set)
+{
+	int i;
+
+	for (i = 0; i < str_set->cnt; ++i) {
+		free(str_set->str[i]);
+	}
+
+	free(str_set->str);
 }
 
 static void generate_random_str(char *buf, int len)
