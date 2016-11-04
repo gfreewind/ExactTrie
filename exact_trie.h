@@ -63,8 +63,9 @@ void exact_trie_destroy(struct exact_trie *trie);
 @str: pattern
 @len: the length of pattern
 @data: the data which attached to pattern. It could be returned when match
+@former_data: When it's not null, return the exising data attached the same pattern. 
 */
-int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data);
+int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data, void **former_data);
 /* Invoke this function after insert all patterns */
 void exact_trie_finalize(struct exact_trie *trie);
 

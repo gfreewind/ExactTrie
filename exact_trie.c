@@ -79,7 +79,7 @@ struct exact_trie *exact_trie_create(void)
 	return root;
 }
 
-int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data)
+int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data, void **former_data)
 {
 	struct trie_node *node;
 
@@ -94,6 +94,9 @@ int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void
 	node = find_trie_node(exact_trie->child, str, len);
 	if (node) {
 		if (node->flags & TRIE_STRING_END) {
+			if (former_data) {
+				*former_data = node->data;
+			}
 			return TRIE_STATUS_DUP_STR;
 		} else {
 			node->data = data;
