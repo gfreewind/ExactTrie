@@ -51,7 +51,7 @@ struct exact_match {
 #endif
 	enum trie_match_mode match_mode;
 	int cont_match; /* Continue match from last match pos */
-	void *data; /* The data attached to the pattern */
+	long data; /* The data attached to the pattern */
 	void *pos;
 };
 
@@ -65,7 +65,7 @@ void exact_trie_destroy(struct exact_trie *trie);
 @data: the data which attached to pattern. It could be returned when match
 @former_data: When it's not null, return the exising data attached the same pattern. 
 */
-int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data, void **former_data);
+int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, long data, long **former_data);
 /* Invoke this function after insert all patterns */
 void exact_trie_finalize(struct exact_trie *trie);
 

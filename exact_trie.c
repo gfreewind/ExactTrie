@@ -39,7 +39,7 @@ struct trie_node {
 	char alpha;
 	unsigned int flags;
 	int depth;
-	void *data;
+	long data;
 };
 
 #ifdef EXACT_TRIE_DEBUG
@@ -48,7 +48,7 @@ static unsigned int exact_trie_free_cnt = 0;
 #endif
 
 static struct trie_node *find_trie_node(const struct trie_child *child, const char *str, int len);
-static int insert_trie_node(struct trie_child *child, const char *str, int len, int depth, void *data);
+static int insert_trie_node(struct trie_child *child, const char *str, int len, int depth, long data);
 static void finalize_trie_node(struct trie_child *child);
 static int compare_trie_node(const void *n1, const void *n2);
 static void free_trie_node(struct trie_child *child);
@@ -79,7 +79,7 @@ struct exact_trie *exact_trie_create(void)
 	return root;
 }
 
-int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void *data, void **former_data)
+int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, long data, long **former_data)
 {
 	struct trie_node *node;
 
@@ -95,7 +95,7 @@ int exact_trie_add(struct exact_trie *exact_trie, const char *str, int len, void
 	if (node) {
 		if (node->flags & TRIE_STRING_END) {
 			if (former_data) {
-				*former_data = node->data;
+				*former_data = &node->data;
 			}
 			return TRIE_STATUS_DUP_STR;
 		} else {
@@ -213,7 +213,7 @@ static struct trie_node *find_trie_node(const struct trie_child *child, const ch
 }
 
 
-static int insert_trie_node(struct trie_child *child, const char *str, int len, int depth, void *data)
+static int insert_trie_node(struct trie_child *child, const char *str, int len, int depth, long data)
 {
 	struct trie_node *nn;
 	int i;

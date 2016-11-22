@@ -2047,7 +2047,7 @@ int main(void)
 	}
 
 	for (i = 0; i < ARRAY_SIZE(pattern); ++i) {
-		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]), (void*)(long)(i+1), NULL);
+		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]), i+1, NULL);
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCase1: unexpected ret(%d) of string(%s)\n", 
 				ret, pattern[i]);
@@ -2057,7 +2057,7 @@ int main(void)
 	fprintf(stdout, "TestCase1: Pass inserting multiple patterns\n");
 
 	for (i = 0; i < ARRAY_SIZE(pattern); ++i) {
-		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]), (void*)(long)i, NULL);
+		ret = exact_trie_add(trie, pattern[i], strlen(pattern[i]), i, NULL);
 		if (ret != TRIE_STATUS_DUP_STR) {
 			fprintf(stderr, "TestCase2: unexpected ret(%d) of string(%s)\n", 
 				ret, pattern[i]);
@@ -2067,7 +2067,7 @@ int main(void)
 	fprintf(stdout, "TestCase2: Pass forbid duplicated patterns test\n");
 
 	for (i = 0; i < ARRAY_SIZE(part_pattern); ++i) {
-		ret = exact_trie_add(trie, part_pattern[i], strlen(part_pattern[i]), (void*)(long)(100+i+1), NULL);
+		ret = exact_trie_add(trie, part_pattern[i], strlen(part_pattern[i]), 100+i+1, NULL);
 		if (ret != TRIE_STATUS_OK) {
 			fprintf(stderr, "TestCase3: unexpected ret(%d) of string(%s)\n", 
 				ret, part_pattern[i]);
@@ -2483,7 +2483,7 @@ static void create_random_str_set(struct str_set *str_set, int str_len, int str_
 		if (trie) {
 			do {
 				generate_random_str(str_set->str[i], str_len);
-				ret = exact_trie_add(trie, str_set->str[i], str_len, NULL, NULL);
+				ret = exact_trie_add(trie, str_set->str[i], str_len, 0, NULL);
 			} while (ret != TRIE_STATUS_OK);
 		}
 	}
@@ -2630,7 +2630,7 @@ static void create_specific_pattern_set(struct str_set *str_set, struct exact_tr
 		int str_len = strlen(g_exact_strs[i]);
 		str_set->str[i] = strdup(g_exact_strs[i]);
 		if (trie) {			
-			ret = exact_trie_add(trie, g_exact_strs[i], str_len, NULL, NULL);
+			ret = exact_trie_add(trie, g_exact_strs[i], str_len, 0, NULL);
 			if (ret == TRIE_STATUS_DUP_STR) {
 				fprintf(stderr, "%s is duplicated\n", g_exact_strs[i]);
 				exit(1);
